@@ -37,6 +37,8 @@ def create_project_structure(project_name: str) -> bool:
             f"logs/log_{project_name}.log",
             # data folder
             f"{data_folder_name}",
+            # schema
+            f"data_schema/schema.yaml",
             # src folder
             f"src/__init__.py",
             f"src/{project_name}/__init__.py",
