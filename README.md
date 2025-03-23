@@ -44,4 +44,19 @@
 
 ### Preprocessing
 * As part of preprocessing, get the number of logs in each category. Then we can know which category has more logs and which category has less logs.
-* Based on the number ofl ogs we can determine if we need to use a BERT model or a LLM model.
+* Based on the number of logs, we can determine if we need to use a BERT model or a LLM model.
+
+### Code
+#### Coding steps
+* Constants
+* Configuration
+* Entity
+  * Config Entity
+* Entity
+  * Artifact Entity
+* Components
+* Pipeline
+* Main
+
+#### Code details
+* The constants are defined in the **src/log_classifier/constants/__init__.py** file.
