@@ -77,7 +77,7 @@
       ├── feature_store/
       │   └── synthetic_logs.csv
       └── ingested/
-          ├── synthetic_logs.csv
+          └── train_data.csv
   ```
 * **Step5**: Add **DataIngestionArtifact** class to `entity/artifact_entity.py` file with paths to train data
 * **Step6**: Add **DataIngestion** class to `components/data_ingestion.py` file

@@ -14,3 +14,6 @@ schema_file_path: str = os.path.join("data_schema", "schema.yaml")
 data_ingestion_dir_name: str = "data_ingestion"
 data_ingestion_feature_store_dir_name: str = "feature_store"
 data_ingestion_ingested_data_dir_name: str = "ingested"
+# DATA VALIDATION CONSTANTS
+data_validation_dir_name: str = "data_validation"
+data_validation_valid_dir: str = "validated"
