@@ -1,7 +1,7 @@
 import sys
 
 from src.log_classifier.components.data_ingestion import DataIngestion
-from src.log_classifier.config.configuration import PipelineConfig
+from src.log_classifier.config.configuration import TrainingPipelineConfig
 from src.log_classifier.entity.artifact_entity import DataIngestionArtifact
 from src.log_classifier.entity.config_entity import DataIngestionConfig
 from src.log_classifier.exception.exception import CustomException
@@ -16,7 +16,7 @@ class DataIngestionTrainingPipeline:
     def data_ingestion(self) -> DataIngestionArtifact:
         tag: str = f"{self.class_name}::data_ingestion::"
         try:
-            config: PipelineConfig = PipelineConfig()
+            config: TrainingPipelineConfig = TrainingPipelineConfig()
             logger.info(f"{tag}::Configuration object created")
 
             data_ingestion_config: DataIngestionConfig = DataIngestionConfig(config)

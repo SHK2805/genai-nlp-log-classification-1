@@ -50,6 +50,7 @@ def create_project_structure(project_name: str) -> bool:
             f"src/{project_name}/exception/exception.py",
             # utils
             f"src/{project_name}/utils/__init__.py",
+            f"src/{project_name}/utils/delete_directories.py",
             # constants
             f"src/{project_name}/constants/__init__.py",
             # components
@@ -70,6 +71,8 @@ def create_project_structure(project_name: str) -> bool:
             f"src/{project_name}/components/data_ingestion.py",
             # main
             "main.py",
+            # clean
+            "clean.py",
         ]
 
         for filepath in list_of_files:
