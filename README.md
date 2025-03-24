@@ -60,3 +60,27 @@
 
 #### Code details
 * The constants are defined in the **src/log_classifier/constants/__init__.py** file.
+
+## Coding Files
+### Data Ingestion
+* For data ingestion we read the data from the `data/synthetic_logs.csv` file
+* **Step1**: Add constants to `constants/__init__.py` file
+* **Step2**: Add **GENERAL** and **DATA INGESTION** constants to `constants/__init__.py` file
+* **Step3**: Add **TrainingPipelineConfig** class to `config/configuration.py` file
+* **Step4**: Add **DataIngestionConfig** class to `entity/config_entity.py` file
+  * In here we create `DataIngestionConfig` class with the below attributes as class variables
+  * These variables contain the folder and file paths for the data ingestion process
+  * Using the above variables, we create the below file structure
+  ```plaintext
+  artifacts/
+  └── data_ingestion/
+      ├── feature_store/
+      │   └── synthetic_logs.csv
+      └── ingested/
+          ├── synthetic_logs.csv
+  ```
+* **Step5**: Add **DataIngestionArtifact** class to `entity/artifact_entity.py` file with paths to train data
+* **Step6**: Add **DataIngestion** class to `components/data_ingestion.py` file
+  * In here we create `DataIngestion` class
+* **Step7**: Add **DataIngestion** class to `pipeline/data_ingestion.py` file
+* **Step8**: Add the pipeline to the `main.py` file and run the pipeline
