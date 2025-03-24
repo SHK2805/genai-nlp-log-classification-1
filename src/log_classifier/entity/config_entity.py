@@ -12,7 +12,7 @@ from src.log_classifier.constants import (data_file_folder_name,
                                           dbscan_eps, dbscan_min_samples, dbscan_metric,
                                           data_transformation_embeddings_dir, data_transformation_data_dir,
                                           data_transformation_regex_none_classified,
-                                          data_transformation_regex_classified)
+                                          data_transformation_regex_classified, model_trainer_dir_name)
 global_data_file_name = data_file_name
 global_train_data_file_name = train_file_name
 class DataIngestionConfig:
@@ -76,3 +76,8 @@ class DataTransformationConfig:
         #           - classified_none_train_data.csv
         #           - classified_train_data.csv
         #           - train_data.csv
+
+class ModelTrainerConfig:
+    def __init__(self, config: TrainingPipelineConfig):
+        self.class_name = self.__class__.__name__
+        self.model_trainer_dir = os.path.join(config.artifact_dir, model_trainer_dir_name)

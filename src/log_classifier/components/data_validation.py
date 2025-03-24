@@ -10,7 +10,8 @@ from src.log_classifier.utils.utils import read_yaml
 
 
 class DataValidation:
-    def __init__(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_config: DataValidationConfig):
+    def __init__(self, data_ingestion_artifact: DataIngestionArtifact,
+                 data_validation_config: DataValidationConfig):
         try:
             self.class_name = self.__class__.__name__
             self.data_ingestion_artifact = data_ingestion_artifact

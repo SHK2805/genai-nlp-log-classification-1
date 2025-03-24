@@ -38,12 +38,31 @@
 * Any logs that are not classified falls into the **Unknown** category.
 * The Unknown category logs can be further classified using the below
   * If there are enough training samples, then a BERT model can be trained on these logs.
-    * We can also use Few Shot Learning approach to tell the LLM model about the new logs.
+    * We can also use a Few Shot Learning approaches to tell the LLM model about the new logs.
   * If there are not enough training samples, then a LLM can be used on these logs.
 * For BERT model, we can use **Logistic Regression** for classification.
 
+### What BERT Is:
+* BERT, short for **Bidirectional Encoder Representations from Transformers**, is a groundbreaking model in Natural Language Processing (NLP) developed by Google. 
+* It is based on the **Transformer architecture**, which has revolutionized the field of NLP. Here's a breakdown:
+  * **Bidirectional**: Unlike earlier models, BERT considers context from both directions (left-to-right and right-to-left) when processing text. This helps it understand the meaning of words based on their surrounding context.
+  * **Pre-trained**: BERT comes pre-trained on a vast corpus of text (like books and Wikipedia). This enables it to grasp nuances in language before being fine-tuned for specific tasks.
+  * **Encoder**: It focuses on encoding input text to extract meaningful representations that can be used for various applications.
+
+### What BERT Is Used For:
+* BERT is a versatile NLP model used for tasks that involve understanding and processing human language. Some common applications include:
+  1. **Text Classification**: Categorizing text into predefined groups, such as spam detection or sentiment analysis.
+  2. **Named Entity Recognition (NER)**: Identifying and extracting entities like names, dates, and locations in text.
+  3. **Question Answering**: Providing answers to questions based on a given passage of text (e.g., in search engines or chatbots).
+  4. **Text Summarization**: Generating concise summaries from longer pieces of text.
+  5. **Language Translation**: Translating text from one language to another.
+  6. **Text Similarity**: Determining how similar two pieces of text are useful in clustering and recommendation systems.
+  7. **Contextual Embeddings**: Generating rich vector representations for words or sentences to be used in downstream ML tasks.
+
+* BERT's ability to understand deep linguistic context has set a high standard in NLP, influencing many later models, such as RoBERTa and DistilBERT.
+
 ### Preprocessing
-* As part of preprocessing, get the number of logs in each category. Then we can know which category has more logs and which category has less logs.
+* As part of preprocessing, get the number of logs in each category. Then we can know which category has more logs and which category has fewer logs.
 * Based on the number of logs, we can determine if we need to use a BERT model or a LLM model.
 
 ### Code

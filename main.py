@@ -1,12 +1,13 @@
 import sys
 from src.log_classifier.entity.artifact_entity import (DataIngestionArtifact,
                                                        DataValidationArtifact,
-                                                       DataTransformationArtifact)
+                                                       DataTransformationArtifact, ModelTrainerArtifact)
 from src.log_classifier.exception.exception import CustomException
 from src.log_classifier.logging.logger import logger
 from src.log_classifier.pipeline.data_ingestion import DataIngestionTrainingPipeline
 from src.log_classifier.pipeline.data_transformation import DataTransformationTrainingPipeline
 from src.log_classifier.pipeline.data_validation import DataValidationTrainingPipeline
+from src.log_classifier.pipeline.model_trainer import ModelTrainerTrainingPipeline
 
 
 class RunPipeline:
@@ -61,10 +62,28 @@ class RunPipeline:
             logger.error(f"{tag}::Error running the data transformation pipeline: {e}")
             raise CustomException(e, sys)
 
+    def run_model_trainer_pipeline(self,
+                                   data_transformation_artifact: DataTransformationArtifact) -> ModelTrainerArtifact:
+        tag: str = f"{self.class_name}::run_model_trainer_pipeline::"
+        try:
+            model_trainer_pipeline: ModelTrainerTrainingPipeline = ModelTrainerTrainingPipeline(
+                data_transformation_artifact)
+            logger.info(f"[STARTED]>>>>>>>>>>>>>>>>>>>> {model_trainer_pipeline.stage_name} <<<<<<<<<<<<<<<<<<<<")
+            logger.info(f"{tag}::Running the model trainer pipeline")
+            model_trainer_artifact = model_trainer_pipeline.train_model()
+            logger.info(f"{tag}::Model trainer pipeline completed")
+            logger.info(
+                f"[COMPLETE]>>>>>>>>>>>>>>>>>>>> {model_trainer_pipeline.stage_name} <<<<<<<<<<<<<<<<<<<<\n\n\n")
+            return model_trainer_artifact
+        except Exception as e:
+            logger.error(f"{tag}::Error running the model trainer pipeline: {e}")
+            raise CustomException(e, sys)
+
     def run(self) -> None:
         data_ingestion_artifact: DataIngestionArtifact = self.run_data_ingestion_pipeline()
         data_validation_artifact: DataValidationArtifact = self.run_data_validation_pipeline(data_ingestion_artifact)
         data_transformation_artifact = self.run_data_transformation_pipeline(data_validation_artifact)
+        model_trainer_artifact = self.run_model_trainer_pipeline(data_transformation_artifact)
 
 if __name__ == "__main__":
     try:

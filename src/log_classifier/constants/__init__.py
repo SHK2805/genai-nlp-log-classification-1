@@ -36,3 +36,6 @@ sentence_transformer_model_name: str = "all-mpnet-base-v2"
 dbscan_eps=0.2
 dbscan_min_samples=1
 dbscan_metric='cosine'
+
+# MODEL TRAINING CONSTANTS
+model_trainer_dir_name: str = "model_training"

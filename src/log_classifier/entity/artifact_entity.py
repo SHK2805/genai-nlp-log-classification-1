@@ -17,3 +17,7 @@ class DataTransformationArtifact:
     transformed_data_file_path: str
     regex_none_classified_data_file_path: str
     regex_classified_data_file_path: str
+
+@dataclass
+class ModelTrainerArtifact:
+    pass
