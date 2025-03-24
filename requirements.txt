@@ -3,3 +3,6 @@ setuptools
 pyyaml
 typing-extensions
 pathlib
+sentence-transformers
+numpy
+scikit-learn
