@@ -6,6 +6,7 @@ import yaml
 import pickle
 
 from sentence_transformers import SentenceTransformer
+from sklearn.linear_model import LogisticRegression
 
 from src.log_classifier.exception.exception import CustomException
 from src.log_classifier.logging.logger import logger
@@ -39,6 +40,17 @@ def load_object(file_path: str, ) -> object:
         with open(file_path, "rb") as file_obj:
             print(file_obj)
             return pickle.load(file_obj)
+    except Exception as e:
+        raise CustomException(e, sys) from e
+
+def logistic_regression_load_object(file_path: str, ) -> LogisticRegression:
+    try:
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"The file: {file_path} is not exists")
+        # Load the LogisticRegression model using pickle
+        with open("final_model/logistic_regression.pkl", "rb") as file:
+            model: LogisticRegression = pickle.load(file)
+            return model
     except Exception as e:
         raise CustomException(e, sys) from e
 
@@ -98,3 +110,51 @@ def save_dataframe(df: pd.DataFrame, file_path: str, description: str):
         logger.info(f"{description} saved successfully to {file_path}")
     except Exception as e:
         raise CustomException(f"Error saving {description}: {str(e)}", sys)
+
+import shutil
+import os
+
+import shutil
+import os
+
+def copy_file_with_validation(source: str, destination: str, valid_extensions=None) -> None:
+    """
+    Copies a file from the source path to the destination path after validating the file type.
+
+    Args:
+        source (str): The file path of the source file to copy.
+        destination (str): The file path where the file should be copied to.
+        valid_extensions (list or None): A list of valid file extensions (e.g., ['.txt', '.csv']).
+                                         If None, validation is skipped.
+
+    Returns:
+        None
+    """
+    try:
+        # Check if the source file exists
+        if not os.path.isfile(source):
+            message: str = f"The source file does not exist: {source}"
+            logger.error(message)
+            raise FileNotFoundError(message)
+
+        # Validate the file extension
+        if valid_extensions:
+            _, file_extension = os.path.splitext(source)
+            if file_extension not in valid_extensions:
+                message: str = f"Invalid file type. Allowed extensions: {', '.join(valid_extensions)}"
+                logger.error(message)
+                raise ValueError(message)
+
+        # Copy the file
+        shutil.copy(source, destination)
+        logger.info(f"File copied successfully from {source} to {destination}")
+
+    except PermissionError as pe:
+        message: str = f"Permissions error when copying the file from {source} to {destination}: {str(pe)}"
+        logger.error(message)
+        raise CustomException(message, sys)
+    except Exception as e:
+        message: str = f"An error occurred when copying the file from {source} to {destination}: {str(e)}"
+        logger.error(message)
+        raise CustomException(message, sys)
+

@@ -22,3 +22,7 @@ class DataTransformationArtifact:
 @dataclass
 class ModelTrainerArtifact:
     logistic_regression_model_file_path: str
+
+@dataclass
+class ModelPusherArtifact:
+    model_file_path: str

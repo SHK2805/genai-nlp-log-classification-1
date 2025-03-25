@@ -16,7 +16,7 @@ from src.log_classifier.constants import (data_file_folder_name,
                                           data_transformation_sentence_transformer_folder,
                                           data_transformation_sentence_transformer_file_name,
                                           model_trainer_test_train_split, model_trainer_model_dir_name,
-                                          model_trainer_model_file_name)
+                                          model_trainer_model_file_name, model_pusher_dir_name)
 global_data_file_name = data_file_name
 global_train_data_file_name = train_file_name
 class DataIngestionConfig:
@@ -95,3 +95,8 @@ class ModelTrainerConfig:
         #   - model_training
         #       - logistic_regression
         #           - logistic_regression.pkl
+
+class ModelPusherConfig:
+    def __init__(self):
+        self.class_name = self.__class__.__name__
+        self.model_pusher_dir_path = os.path.join(model_pusher_dir_name)

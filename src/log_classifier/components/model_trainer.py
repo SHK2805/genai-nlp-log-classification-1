@@ -12,7 +12,6 @@ from src.log_classifier.exception.exception import CustomException
 from src.log_classifier.logging.logger import logger
 from src.log_classifier.utils.utils import sentence_transformer_load_object, save_object
 
-
 class ModelTrainer:
     def __init__(self, data_transformation_artifact: DataTransformationArtifact,
                  model_trainer_config: ModelTrainerConfig):

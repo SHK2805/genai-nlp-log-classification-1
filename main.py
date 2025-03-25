@@ -1,4 +1,6 @@
 import sys
+
+from config.set_config import Config
 from src.log_classifier.entity.artifact_entity import (DataIngestionArtifact,
                                                        DataValidationArtifact,
                                                        DataTransformationArtifact, ModelTrainerArtifact)
@@ -7,6 +9,7 @@ from src.log_classifier.logging.logger import logger
 from src.log_classifier.pipeline.data_ingestion import DataIngestionTrainingPipeline
 from src.log_classifier.pipeline.data_transformation import DataTransformationTrainingPipeline
 from src.log_classifier.pipeline.data_validation import DataValidationTrainingPipeline
+from src.log_classifier.pipeline.model_pusher import ModelPusherTrainingPipeline
 from src.log_classifier.pipeline.model_trainer import ModelTrainerTrainingPipeline
 
 
@@ -79,14 +82,37 @@ class RunPipeline:
             logger.error(f"{tag}::Error running the model trainer pipeline: {e}")
             raise CustomException(e, sys)
 
+    def run_model_pusher_pipeline(self, model_trainer_artifact: ModelTrainerArtifact) -> None:
+        tag: str = f"{self.class_name}::run_model_pusher_pipeline::"
+        try:
+            model_pusher_pipeline: ModelPusherTrainingPipeline = ModelPusherTrainingPipeline(model_trainer_artifact)
+            logger.info(f"[STARTED]>>>>>>>>>>>>>>>>>>>> {model_pusher_pipeline.stage_name} <<<<<<<<<<<<<<<<<<<<")
+            logger.info(f"{tag}::Running the model pusher pipeline")
+            model_pusher_pipeline.model_pusher()
+            logger.info(f"{tag}::Model pusher pipeline completed")
+            logger.info(
+                f"[COMPLETE]>>>>>>>>>>>>>>>>>>>> {model_pusher_pipeline.stage_name} <<<<<<<<<<<<<<<<<<<<\n\n\n")
+        except Exception as e:
+            logger.error(f"{tag}::Error running the model pusher pipeline: {e}")
+            raise CustomException(e, sys)
+
     def run(self) -> None:
         data_ingestion_artifact: DataIngestionArtifact = self.run_data_ingestion_pipeline()
         data_validation_artifact: DataValidationArtifact = self.run_data_validation_pipeline(data_ingestion_artifact)
-        data_transformation_artifact = self.run_data_transformation_pipeline(data_validation_artifact)
-        model_trainer_artifact = self.run_model_trainer_pipeline(data_transformation_artifact)
+        data_transformation_artifact: DataTransformationArtifact = self.run_data_transformation_pipeline(data_validation_artifact)
+        model_trainer_artifact: ModelTrainerArtifact = self.run_model_trainer_pipeline(data_transformation_artifact)
+        # filepath = os.path.join("artifacts/25_03_2025_13_56_37/model_training/logistic_regression.pkl")
+        # model_trainer_artifact = ModelTrainerArtifact(model_file_path=filepath)
+        self.run_model_pusher_pipeline(model_trainer_artifact)
 
 if __name__ == "__main__":
     try:
+        config = Config()
+        if config.set():
+            logger.info("Environment variables set")
+        else:
+            logger.error("Environment variables NOT set")
+            raise CustomException("Environment variables NOT set", sys)
         # Run the pipelines
         run_pipeline = RunPipeline()
         run_pipeline.run()

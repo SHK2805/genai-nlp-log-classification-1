@@ -44,3 +44,6 @@ model_trainer_dir_name: str = "model_training"
 model_trainer_model_dir_name: str = "logistic_regression"
 model_trainer_model_file_name: str = "logistic_regression.pkl"
 model_trainer_test_train_split: float = 0.3
+
+# MODEL PUSHER CONSTANTS
+model_pusher_dir_name: str = "final_model"

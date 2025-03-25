@@ -1,9 +1,22 @@
-from dotenv import load_dotenv
+import sys
+
 from groq import Groq
 import re
 
+from config.set_config import Config
+from src.log_classifier.exception.exception import CustomException
+from src.log_classifier.logging.logger import logger
 
-load_dotenv()
+try:
+    config = Config()
+    if config.set():
+        logger.info("Environment variables set")
+    else:
+        logger.error("Environment variables NOT set")
+        raise CustomException("Environment variables NOT set", sys)
+except Exception as ex:
+    logger.error(f"Error running the pipeline: {ex}")
+    raise CustomException(ex, sys)
 
 groq = Groq()
 
@@ -36,8 +49,8 @@ def llm_classifier(log_msg):
 
 
 if __name__ == "__main__":
-    print(classify_with_llm(
+    print(llm_classifier(
         "Case escalation for ticket ID 7324 failed because the assigned support agent is no longer active."))
-    print(classify_with_llm(
+    print(llm_classifier(
         "The 'ReportGenerator' module will be retired in version 4.0. Please migrate to the 'AdvancedAnalyticsSuite' by Dec 2025"))
-    print(classify_with_llm("System reboot initiated by user 12345."))
+    print(llm_classifier("System reboot initiated by user 12345."))

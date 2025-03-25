@@ -3,30 +3,30 @@ from src.log_classifier.utils.classifiers.llm_classifier import llm_classifier
 from src.log_classifier.utils.classifiers.regex_classifier import regex_classifier
 
 
-def classify(logs, model=None):
+def classify(logs):
     labels = []
     for source, log_msg in logs:
-        label = log_classifier(source, log_msg, model)
+        label = log_classifier(source, log_msg)
         labels.append(label)
     return labels
 
 
-def log_classifier(source, log_msg, model=None):
+def log_classifier(source, log_msg):
     if source == "LegacyCRM":
         label = llm_classifier(log_msg)
     else:
         label = regex_classifier(log_msg)
         if not label:
-            label = bert_classifier(log_msg, model)
+            label = bert_classifier(log_msg)
     return label
 
-def csv_classifier(input_file, model=None):
+def csv_classifier(input_file):
     import pandas as pd
     df = pd.read_csv(input_file)
 
     # Perform classification
     logs = list(zip(df["source"], df["log_message"]))
-    df["target_label"] = classify(logs, model)
+    df["target_label"] = classify(logs)
 
     # Save the modified file
     output_file = "output.csv"
@@ -35,7 +35,7 @@ def csv_classifier(input_file, model=None):
     return output_file
 
 if __name__ == '__main__':
-    classify_csv("test.csv")
+    csv_classifier("test.csv")
     # logs = [
     #     ("ModernCRM", "IP 192.168.133.114 blocked due to potential attack"),
     #     ("BillingSystem", "User 12345 logged in."),

@@ -9,12 +9,35 @@
 * FastAPI
   * For building the server backend
 
-### Problem Statement
+### Project Statement
 * This application acts as a **Log Classifier** which classifies the logs into different categories based on the log message.
-* Then the classified logs can be fed into the log management system for further analysis.
-* The logs can be of different types/levels like **Security**, **Workflow Error**, **User**, **Resource Usage** etc.
 * The logs are obtained from various sources like **Application Logs**, **Server Logs**, **System Logs** etc.
 * All the logs can be aggregated into a single system/file and then classified based on the log message.
+* Then the classified logs can be fed into the log management system for further analysis.
+* The log message is the input feature in the column **log_message**
+* This is analyzed and then classified into different categories based on the log message like **Security**, **Workflow Error**, **User**, **Resource Usage** etc.
+* We use three different models to classify the logs
+  * **Regular Expressions** are used to classify the logs into different categories
+  * The ones that cannot be classified using Regular Expressions are classified using **BERT** model
+    * We take the probability 0.5 as the threshold for classification
+  * The ones that cannot be classified using a BERT model are classified using **LLM** model
+    * GORQ is used for the classification
+* First, the data is processed using the **Data Ingestion** pipeline
+  * Here we read the data from the CSV file and store it in the `ingested` folder
+* Second, the data is processed using the **Data Validation** pipeline
+  * The data is validated using the `data_schema/schema.yaml` file to check the required columns are present
+  * The validated data is stored in the `data_validation` folder
+* Third, the data is transformed using the **Data Transformation** pipeline 
+  * Embeddings and Sentence Transformers are used to convert the log messages into embeddings
+  * The model and the embeddings are stored in the `data_transformation` folder
+  * The data is split into the classified and unclassified data files
+* Fourth, the data is processed using the **Model Training** pipeline
+  * The unclassified data is trained using the BERT model
+  * The model is stored in the `model_training` folder
+* A classifier function is created to classify the logs in the `utils/classifiers/classifier.py` folder
+  * The logs are classified using the Regular Expressions, BERT model and LLM model
+* FastAPI is used to create the server backend
+  
 
 ### Data
 * The data used for training the model is a **Synthetic Dataset** which is generated.
@@ -41,6 +64,26 @@
     * We can also use a Few Shot Learning approaches to tell the LLM model about the new logs.
   * If there are not enough training samples, then a LLM can be used on these logs.
 * For BERT model, we can use **Logistic Regression** for classification.
+
+
+### .env
+* Create a `.env` file in the root directory
+* The required keys are stored in this file
+* Install the `python-dotenv` package to load the keys from the `.env` file using requirements.txt
+* The keys are loaded using the below code
+```python
+from config.set_config import Config
+
+config = Config()
+if config.set():
+    print("Environment variables set")
+else:
+    print("Environment variables NOT set")
+```
+
+### GROQ
+* The project uses GROQ to query the data
+* Install the GROQ package by adding `langchain-groq` to requirements.txt
 
 ### What BERT Is:
 * BERT, short for **Bidirectional Encoder Representations from Transformers**, is a groundbreaking model in Natural Language Processing (NLP) developed by Google. 
@@ -103,3 +146,11 @@
   * In here we create `DataIngestion` class
 * **Step7**: Add **DataIngestion** class to `pipeline/data_ingestion.py` file
 * **Step8**: Add the pipeline to the `main.py` file and run the pipeline
+
+### Other pipelines
+* The other pipelines are similar to the data ingestion pipeline
+* The other pipelines are
+  * Data Validation
+  * Data Transformation
+  * Model Training
+    * This trains the BERT model and saves the model

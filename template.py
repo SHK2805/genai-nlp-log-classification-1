@@ -33,8 +33,12 @@ def create_project_structure(project_name: str) -> bool:
             ".gitignore",
             "requirements.txt",
             "README.md",
+            # env config
+            ".env",
+            "config/env_manager.py",
+            "config/set_config.py",
             # logs
-            f"logs/{project_name}.log",
+            f"logs/",
             # data folder
             f"{data_folder_name}",
             # schema
@@ -71,16 +75,22 @@ def create_project_structure(project_name: str) -> bool:
             f"src/{project_name}/components/data_validation.py",
             f"src/{project_name}/components/data_transformation.py",
             f"src/{project_name}/components/model_trainer.py",
+            f"src/{project_name}/components/model_pusher.py",
             # pipeline
             f"src/{project_name}/pipeline/__init__.py",
             f"src/{project_name}/pipeline/data_ingestion.py",
             f"src/{project_name}/pipeline/data_validation.py",
             f"src/{project_name}/pipeline/data_transformation.py",
             f"src/{project_name}/pipeline/model_trainer.py",
+            f"src/{project_name}/pipeline/model_pusher.py",
+            # final model
+            f"final_model/",
             # main
             "main.py",
             # clean
             "clean.py",
+            # app
+            "app.py",
         ]
 
         for filepath in list_of_files:
