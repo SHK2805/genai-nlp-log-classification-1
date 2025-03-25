@@ -17,7 +17,8 @@ class DataTransformationArtifact:
     transformed_data_file_path: str
     regex_none_classified_data_file_path: str
     regex_classified_data_file_path: str
+    sentence_transformer_file_path: str
 
 @dataclass
 class ModelTrainerArtifact:
-    pass
+    logistic_regression_model_file_path: str

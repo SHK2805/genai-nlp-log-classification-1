@@ -14,6 +14,7 @@ data_file_folder_name="data"
 data_file_name="synthetic_logs.csv"
 train_file_name: str = "train_data.csv"
 schema_file_path: str = os.path.join("data_schema", "schema.yaml")
+sentence_transformer_model_name: str = "all-mpnet-base-v2"
 
 # DATA INGESTION CONSTANTS
 data_ingestion_dir_name: str = "data_ingestion"
@@ -31,7 +32,8 @@ data_transformation_embeddings_file_name: str = "embeddings.npy"
 data_transformation_data_dir: str = "transformed"
 data_transformation_regex_none_classified: str = "classified_none_" + train_file_name
 data_transformation_regex_classified: str = "classified_" + train_file_name
-sentence_transformer_model_name: str = "all-mpnet-base-v2"
+data_transformation_sentence_transformer_folder: str = "sentence_transformer"
+data_transformation_sentence_transformer_file_name: str = "sentence_transformer.pkl"
 # these dbscan values need to be tuned by trail and error
 dbscan_eps=0.2
 dbscan_min_samples=1
@@ -39,3 +41,6 @@ dbscan_metric='cosine'
 
 # MODEL TRAINING CONSTANTS
 model_trainer_dir_name: str = "model_training"
+model_trainer_model_dir_name: str = "logistic_regression"
+model_trainer_model_file_name: str = "logistic_regression.pkl"
+model_trainer_test_train_split: float = 0.3

@@ -2,11 +2,15 @@ import os.path
 import sys
 
 import pandas as pd
-
+from sentence_transformers import SentenceTransformer
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report
 from src.log_classifier.entity.artifact_entity import DataTransformationArtifact, ModelTrainerArtifact
 from src.log_classifier.entity.config_entity import ModelTrainerConfig
 from src.log_classifier.exception.exception import CustomException
 from src.log_classifier.logging.logger import logger
+from src.log_classifier.utils.utils import sentence_transformer_load_object, save_object
 
 
 class ModelTrainer:
@@ -22,7 +26,30 @@ class ModelTrainer:
             raise CustomException(message, sys)
 
     def perform_bret_classification(self, non_legacy_crm_df: pd.DataFrame):
-        pass
+        sentence_transformer_file_path = self.data_transformation_artifact.sentence_transformer_file_path
+        if not os.path.exists(sentence_transformer_file_path):
+            raise FileNotFoundError(f"Sentence transformer model file not found: {sentence_transformer_file_path}")
+
+        # load the sentence transformer model
+        model: SentenceTransformer = sentence_transformer_load_object(sentence_transformer_file_path)
+        embeddings = model.encode(non_legacy_crm_df['log_message'].values)
+        # train the model
+        X = embeddings
+        y = non_legacy_crm_df['target_label']
+        # train the model
+        X_train, X_test, y_train, y_test = train_test_split(X,
+                                                            y,
+                                                            test_size=self.model_trainer_config.model_trainer_test_train_split,
+                                                            random_state=42)
+        reg = LogisticRegression(max_iter=1000)
+        reg.fit(X_train, y_train)
+        y_pred = reg.predict(X_test)
+        report = classification_report(y_test, y_pred)
+        logger.info(f"Classification report for the non-legacy crm data: {report}")
+        # save the model
+        save_object(self.model_trainer_config.model_trainer_model_file_path, reg)
+        logger.info(f"Model saved successfully at: {self.model_trainer_config.model_trainer_model_file_path}")
+        return self.model_trainer_config.model_trainer_model_file_path
 
     def initiate_model_trainer(self) -> ModelTrainerArtifact:
         tag: str = f"{self.class_name}::initiate_model_trainer"
@@ -60,10 +87,7 @@ class ModelTrainer:
             else:
                 # perform BERT classification on the non-legacy crm data
                 self.perform_bret_classification(non_legacy_crm_df)
-
-
-
-            return ModelTrainerArtifact()
+            return ModelTrainerArtifact(self.model_trainer_config.model_trainer_model_file_path)
         except Exception as e:
             logger.error(f"{tag}::Error in loading data: {str(e)}")
             raise CustomException(e, sys)

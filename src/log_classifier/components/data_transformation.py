@@ -1,26 +1,24 @@
 import os
 import sys
-
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import DBSCAN
-
 from src.log_classifier.constants import (sentence_transformer_model_name,
                                           dbscan_eps,
                                           dbscan_min_samples,
                                           dbscan_metric,
-                                          cluster_label, regex_label)
+                                          cluster_label,
+                                          regex_label)
 from src.log_classifier.entity.artifact_entity import DataValidationArtifact, DataTransformationArtifact
 from src.log_classifier.entity.config_entity import DataTransformationConfig
 from src.log_classifier.exception.exception import CustomException
 from src.log_classifier.logging.logger import logger
-from src.log_classifier.utils.classify_regex import classify_with_regex
-from src.log_classifier.utils.utils import save_numpy_array_data
+from src.log_classifier.utils.classifiers.regex_classifier import regex_classifier
+from src.log_classifier.utils.utils import save_numpy_array_data, sentence_transformer_save_object, save_dataframe
 
 
 class DataTransformation:
-    def __init__(self, data_validation_artifact: DataValidationArtifact,
-                 config: DataTransformationConfig):
+    def __init__(self, data_validation_artifact: DataValidationArtifact, config: DataTransformationConfig):
         try:
             self.class_name = self.__class__.__name__
             self.data_validation_artifact = data_validation_artifact
@@ -32,111 +30,83 @@ class DataTransformation:
     @staticmethod
     def read_data(file_path: str) -> pd.DataFrame:
         try:
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"File not found: {file_path}")
             return pd.read_csv(file_path)
         except Exception as e:
-            logger.error(f"Error reading the data: {e}")
-            raise CustomException(e, sys) from e
+            raise CustomException(f"Error reading the data: {e}", sys) from e
 
-    def visualize_data(self, data: pd.DataFrame):
-        tag: str = f"{self.class_name}::visualize_data"
+    def save_model(self, model: SentenceTransformer):
+        tag: str = f"{self.class_name}::save_model"
         try:
-            # check if data is not empty
-            if data.empty:
-                raise CustomException("Data is empty", sys)
-
-            cluster_counts = data[cluster_label].value_counts()
-            logger.info(f"{tag}::Number of clusters: {cluster_counts}")
-
-            for cluster in cluster_counts[cluster_counts > 10].index:
-                cluster_data = data[data[cluster_label] == cluster]
-                print(f"{tag}::Cluster: {cluster}")
-                print(f"{tag}::Number of logs: {cluster_data.shape[0]}")
-                print(f"{tag}::Sample logs\n: {cluster_data['log_message'].sample(5).values}")
-                print("*" * 50)
-
+            os.makedirs(self.config.data_transformation_sentence_transformer_folder, exist_ok=True)
+            sentence_transformer_save_object(self.config.data_transformation_sentence_transformer_file_path, model)
+            logger.info(f"{tag}::Model saved to {self.config.data_transformation_sentence_transformer_file_path}")
         except Exception as e:
-            message = f"{tag}::Error in visualizing data: {str(e)}"
-            logger.error(message)
-            raise CustomException(message, sys)
+            raise CustomException(f"Error saving model: {str(e)}", sys)
+
+    def generate_embeddings(self, model: SentenceTransformer, data: pd.DataFrame) -> list:
+        try:
+            tag: str = f"{self.class_name}::generate_embeddings"
+            return model.encode(data['log_message'].values.tolist())
+        except Exception as e:
+            raise CustomException(f"Error generating embeddings: {str(e)}", sys)
+
+    def perform_clustering(self, embeddings: list) -> list:
+        try:
+            tag: str = f"{self.class_name}::perform_clustering"
+            dbscan = DBSCAN(eps=dbscan_eps,
+                            min_samples=dbscan_min_samples,
+                            metric=dbscan_metric)
+            logger.info(f"{tag}::Performing clustering")
+            return dbscan.fit_predict(embeddings)
+        except Exception as e:
+            raise CustomException(f"Error performing clustering: {str(e)}", sys)
 
     def initiate_data_transformation(self) -> DataTransformationArtifact:
         tag: str = f"{self.class_name}::initiate_data_transformation"
         try:
             logger.info(f"{tag}::Initiating data transformation")
-            # check if data validation is successful
+            # Validation check
             if not self.data_validation_artifact.validation_status:
                 raise CustomException("Data validation failed", sys)
 
-            # read the data
-            train_df = DataTransformation.read_data(self.data_validation_artifact.valid_train_file_path)
-            logger.info(f"{tag}::Data read successfully")
+            # Step 1: Read data
+            train_df = self.read_data(self.data_validation_artifact.valid_train_file_path)
 
-            # load the sentence transformer model
+            # Step 2: Load and save model
             model = SentenceTransformer(sentence_transformer_model_name)
-            logger.info(f"{tag}::Model {sentence_transformer_model_name} loaded successfully")
+            self.save_model(model)
+            logger.info(f"{tag}::Model saved successfully")
 
-            # get the embeddings for the log messages
-            # Assuming x_feature_names contains the names of the columns to encode
-            embeddings = model.encode(train_df['log_message'].values.tolist())
-            logger.info(f"{tag}::Embeddings generated successfully")
-
-            # save the embeddings as a numpy array
-            # NOTE: Here we are saving only the columns in x_feature_names as a numpy array
-            # save data
-            data_transformation_dir = self.config.data_transformation_dir
-            # create directory if not exists
-            os.makedirs(data_transformation_dir, exist_ok=True)
+            # Step 3: Generate and save embeddings
+            embeddings = self.generate_embeddings(model, train_df)
             save_numpy_array_data(self.config.embeddings_file_path, embeddings)
+            logger.info(f"{tag}::Embeddings saved successfully")
 
-            # perform the dbscan clustering
-            # NOTE: see the data in the cluster and tune the dbscan parameters
-            dbscan = DBSCAN(eps=dbscan_eps, min_samples=dbscan_min_samples, metric=dbscan_metric)
-            clusters = dbscan.fit_predict(embeddings)
+            # Step 4: Perform clustering
+            train_df[cluster_label] = self.perform_clustering(embeddings)
 
-            # add the cluster labels to the dataframe
-            train_df[cluster_label] = clusters
+            # Step 5: Classify using regex
+            train_df[regex_label] = train_df['log_message'].apply(regex_classifier)
 
-            """
-            visualize the data to identify patterns
-            This is done to identify if the clusters are meaningful and fine tune the dbscan parameters
-            Generally this will be done in a colab notebook or a jupyter notebook to identify the patterns and prepare the regex patterns
-            """
-            # self.visualize_data(train_df)
+            # Step 6: Split data
+            none_train_df = train_df[train_df[regex_label].isnull()]
+            classified_train_df = train_df[train_df[regex_label].notnull()]
 
-            # apply regex to the dataframe and create a new column with the regex pattern
-            # this will be used to identify the log message patterns
-            # add the regex labels to the dataframe
-            train_df[regex_label] = train_df['log_message'].apply(classify_with_regex)
+            # Step 7: Save data
+            os.makedirs(self.config.transformed_data_dir, exist_ok=True)
+            save_dataframe(train_df, self.config.transformed_data_file_path, f"{self.class_name}::Transformed data")
+            save_dataframe(none_train_df, self.config.transformed_none_regex_file_name, f"{self.class_name}::None regex data")
+            save_dataframe(classified_train_df, self.config.transformed_classified_regex_file_name, f"{self.class_name}::Classified regex data")
 
-            # check the data that are None
-            none_train_df = train_df[train_df[regex_label].isnull()].copy()
-            logger.info(f"{tag}::Number of logs with regex classification as None: {none_train_df.shape[0]}")
-
-            # non-null data
-            classified_train_df = train_df[train_df[regex_label].notnull()].copy()
-            logger.info(f"{tag}::Number of logs with regex classification: {classified_train_df.shape[0]}")
-
-
-            # save the dataframe with cluster labels,
-            # save data
-            transformed_data_dir = self.config.transformed_data_dir
-            # create directory if not exists
-            os.makedirs(transformed_data_dir, exist_ok=True)
-            train_df.to_csv(self.config.transformed_data_file_path, index=False, header=True)
-            logger.info(f"{tag}::Regex data saved successfully to {self.config.transformed_data_file_path}")
-
-            # save the data that are not classified
-            none_train_df.to_csv(self.config.transformed_none_regex_file_name, index=False, header=True)
-            logger.info(f"{tag}::none Regex data saved successfully to {self.config.transformed_none_regex_file_name}")
-
-            # save the data that are classified
-            classified_train_df.to_csv(self.config.transformed_classified_regex_file_name, index=False, header=True)
-            logger.info(f"{tag}::Regex classified data saved successfully to {self.config.transformed_classified_regex_file_name}")
-
-            return DataTransformationArtifact(model_embeddings_file_path=self.config.embeddings_file_path,
-                                              transformed_data_file_path=self.config.transformed_data_file_path,
-                                              regex_none_classified_data_file_path=self.config.transformed_none_regex_file_name,
-                                              regex_classified_data_file_path=self.config.transformed_classified_regex_file_name)
+            return DataTransformationArtifact(
+                model_embeddings_file_path=self.config.embeddings_file_path,
+                transformed_data_file_path=self.config.transformed_data_file_path,
+                regex_none_classified_data_file_path=self.config.transformed_none_regex_file_name,
+                regex_classified_data_file_path=self.config.transformed_classified_regex_file_name,
+                sentence_transformer_file_path=self.config.data_transformation_sentence_transformer_file_path
+            )
         except Exception as e:
-            logger.error(f"{tag}::Error in loading data: {str(e)}")
+            logger.error(f"Error in data transformation: {str(e)}")
             raise CustomException(e, sys)

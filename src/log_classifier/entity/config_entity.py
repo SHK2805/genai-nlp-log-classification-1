@@ -12,7 +12,11 @@ from src.log_classifier.constants import (data_file_folder_name,
                                           dbscan_eps, dbscan_min_samples, dbscan_metric,
                                           data_transformation_embeddings_dir, data_transformation_data_dir,
                                           data_transformation_regex_none_classified,
-                                          data_transformation_regex_classified, model_trainer_dir_name)
+                                          data_transformation_regex_classified, model_trainer_dir_name,
+                                          data_transformation_sentence_transformer_folder,
+                                          data_transformation_sentence_transformer_file_name,
+                                          model_trainer_test_train_split, model_trainer_model_dir_name,
+                                          model_trainer_model_file_name)
 global_data_file_name = data_file_name
 global_train_data_file_name = train_file_name
 class DataIngestionConfig:
@@ -62,6 +66,8 @@ class DataTransformationConfig:
         self.transformed_data_file_path = os.path.join(self.transformed_data_dir, global_train_data_file_name)
         self.transformed_none_regex_file_name: str = os.path.join(self.transformed_data_dir, data_transformation_regex_none_classified)
         self.transformed_classified_regex_file_name: str = os.path.join(self.transformed_data_dir, data_transformation_regex_classified)
+        self.data_transformation_sentence_transformer_folder: str = os.path.join(self.data_transformation_dir, data_transformation_sentence_transformer_folder)
+        self.data_transformation_sentence_transformer_file_path: str = os.path.join(self.data_transformation_sentence_transformer_folder, data_transformation_sentence_transformer_file_name)
         # dbscan clustering
         self.dbscan_eps = dbscan_eps
         self.dbscan_min_samples = dbscan_min_samples
@@ -81,3 +87,11 @@ class ModelTrainerConfig:
     def __init__(self, config: TrainingPipelineConfig):
         self.class_name = self.__class__.__name__
         self.model_trainer_dir = os.path.join(config.artifact_dir, model_trainer_dir_name)
+        self.model_trainer_model_dir_path: str = os.path.join(self.model_trainer_dir, model_trainer_model_dir_name)
+        self.model_trainer_model_file_path: str = os.path.join(self.model_trainer_dir, model_trainer_model_file_name)
+        self.model_trainer_test_train_split = model_trainer_test_train_split
+        # folder structure
+        # - artifacts
+        #   - model_training
+        #       - logistic_regression
+        #           - logistic_regression.pkl

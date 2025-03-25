@@ -6,7 +6,7 @@ from src.log_classifier.entity.artifact_entity import DataIngestionArtifact, Dat
 from src.log_classifier.entity.config_entity import DataValidationConfig
 from src.log_classifier.exception.exception import CustomException
 from src.log_classifier.logging.logger import logger
-from src.log_classifier.utils.utils import read_yaml
+from src.log_classifier.utils.utils import read_yaml, save_dataframe
 
 
 class DataValidation:
@@ -101,7 +101,7 @@ class DataValidation:
             # create directory if not exists
             os.makedirs(valid_data_dir, exist_ok=True)
             logger.info(f"{tag}::Folder created: {valid_data_dir}")
-            train_data.to_csv(self.data_validation_config.valid_train_file_path, index=False, header=True)
+            save_dataframe(train_data, self.data_validation_config.valid_train_file_path, f"{tag}::validated training data export")
             logger.info(f"{tag}::Validated data saved to csv successfully")
 
             # create data validation artifact

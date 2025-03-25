@@ -1,5 +1,5 @@
 import re
-def classify_with_regex(log_message):
+def regex_classifier(log_message):
     regex_patterns = {
         r"User User\d+ logged (in|out).": "User Action",
         r"Backup (started|ended) at .*": "System Notification",
@@ -11,11 +11,12 @@ def classify_with_regex(log_message):
         r"Account with ID .* created by .*": "User Action"
     }
     for pattern, label in regex_patterns.items():
-        if re.search(pattern, log_message, re.IGNORECASE):
+        if re.search(pattern, log_message):
             return label
     return None
 
 if __name__ == "__main__":
-    print(classify_with_regex("Backup completed successfully."))
-    print(classify_with_regex("Account with ID 1234 created by User1."))
-    print(classify_with_regex("Hello World!"))
+    print(regex_classifier("Backup completed successfully."))
+    print(regex_classifier("Account with ID 1234 created by User1."))
+    print(regex_classifier("Hello World!"))
+

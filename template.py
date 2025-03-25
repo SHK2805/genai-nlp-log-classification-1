@@ -52,7 +52,10 @@ def create_project_structure(project_name: str) -> bool:
             f"src/{project_name}/utils/__init__.py",
             f"src/{project_name}/utils/delete_directories.py",
             f"src/{project_name}/utils/utils.py",
-            f"src/{project_name}/utils/classify_regex.py",
+            f"src/{project_name}/utils/classifiers/classifier.py",
+            f"src/{project_name}/utils/classifiers/regex_classifier.py",
+            f"src/{project_name}/utils/classifiers/bert_classifier.py",
+            f"src/{project_name}/utils/classifiers/llm_classifier.py",
             # constants
             f"src/{project_name}/constants/__init__.py",
             # config

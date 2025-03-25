@@ -7,6 +7,8 @@ from src.log_classifier.entity.artifact_entity import DataIngestionArtifact
 from src.log_classifier.entity.config_entity import DataIngestionConfig
 from src.log_classifier.exception.exception import CustomException
 from src.log_classifier.logging.logger import logger
+from src.log_classifier.utils.utils import save_dataframe
+
 
 # In the future, if the datasource is changed to a different source, we can modify the class
 # Added for future extensibility
@@ -44,7 +46,7 @@ class DataIngestion:
             os.makedirs(feature_store_dir, exist_ok=True)
             logger.info(f"{tag}::Created folder: {feature_store_dir}")
             # save the data into the feature store
-            df.to_csv(feature_store_file_path, index=False, header=True)
+            save_dataframe(df, feature_store_file_path, f"{tag}::data feature store export")
             logger.info(f"{tag}::Exported data into feature store: {feature_store_file_path}")
             return df
         except Exception as e:
@@ -66,7 +68,7 @@ class DataIngestion:
             os.makedirs(train_test_dir, exist_ok=True)
             logger.info(f"{tag}::Created folder: {train_test_dir}")
             # save the train and test data
-            df.to_csv(training_file_path, index=False, header=True)
+            save_dataframe(df, training_file_path, f"{tag}::training data export")
             logger.info(
                 f"{tag}::Exported data into train file: {training_file_path}")
             return training_file_path
