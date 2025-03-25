@@ -175,4 +175,3 @@ cython_debug/
 /.idea
 .DS_Store
 /artifacts
-/final_model

@@ -1,3 +1,5 @@
+import os.path
+
 from sentence_transformers import SentenceTransformer
 from sklearn.linear_model import LogisticRegression
 
@@ -5,14 +7,21 @@ from src.log_classifier.constants import sentence_transformer_model_name
 from src.log_classifier.utils.utils import logistic_regression_load_object
 
 # Load the LogisticRegression model using pickle
-model: LogisticRegression = logistic_regression_load_object("final_model/logistic_regression.pkl")
+model_path: str = "final_model/logistic_regression.pkl"
+model: LogisticRegression = logistic_regression_load_object(model_path)
 model_embedding = SentenceTransformer(sentence_transformer_model_name)
 
 def bert_classifier(log_message):
+    # check a file in the model path exists
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"The file: {model_path} is not exists")
+
     if not model or not model_embedding:
         raise ValueError("Model and model_embedding must be provided")
+
     if not log_message:
         raise ValueError("log_message must be provided")
+
     embeddings = model_embedding.encode([log_message])
     probabilities = model.predict_proba(embeddings)[0]
     if max(probabilities) < 0.5:

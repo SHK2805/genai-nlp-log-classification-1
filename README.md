@@ -81,6 +81,35 @@ else:
     print("Environment variables NOT set")
 ```
 
+### FastAPI
+* Before runing the FastAPI server, run the `main.py` file to create the required folders and files
+* FastAPI is used to create the server backend
+* Install the FastAPI package by adding `fastapi` to requirements.txt
+* Install the Uvicorn package by adding `uvicorn` to requirements.txt
+* The server can be started using the below command
+```bash
+uvicorn main:app --reload
+```
+* The server can be accessed at `http://127.0.0.1:8000/`
+* The server has the below endpoints
+  * `/` - This is the root endpoint
+  * `/classify/`
+    * This endpoint classifies the logs into different categories
+    * The logs are sent as a POST request
+    * This does not accept GET requests
+    * You need to use CURL or POSTMAN to send the logs as a POST request
+    * POSTMAN steps
+      * Open the POSTMAN application
+      * Create a new request
+      * Select POST and give the URL http://127.0.0.1:8000/classify/
+      * Go to the Body tab
+      * Select the form-data option
+      * Add the key as `file`
+      * Add the key type as `File`
+      * Upload the test file
+      * Click on the Send button
+* The results are stored in the `output/output.csv`
+
 ### GROQ
 * The project uses GROQ to query the data
 * Install the GROQ package by adding `langchain-groq` to requirements.txt
